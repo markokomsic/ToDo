@@ -1,14 +1,37 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm import Session
 from typing import List
-from app.schemas import Todo, TodoCreate
-from app.crud import get_todos, create_todo
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordBearer
+from .. import schemas, crud, models
+from ..database import SessionLocal, engine
+from ..auth import verify_token
+
+models.Base.metadata.create_all(bind=engine)
 
 router = APIRouter()
+templates = Jinja2Templates(directory="app/templates")
 
-@router.get("/todos", response_model=List[Todo])
-def read_todos():
-    return get_todos()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@router.post("/todos", response_model=Todo)
-def add_todo(todo: TodoCreate):
-    return create_todo(todo)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@router.get("/todos", response_class=HTMLResponse)
+def read_todos(request: Request, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    username = verify_token(token, credentials_exception)
+    user = crud.get_user_by_username(db, username=username)
+    if user is None:
+        raise credentials_exception
+    todos = crud.get_todos(db, user_id=user.id)
+    return templates.TemplateResponse("todos.html", {"request": request, "todos": todos})
