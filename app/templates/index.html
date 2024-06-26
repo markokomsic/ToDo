@@ -1,13 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ToDo App</title>
+    <title>ToDo Aplikacija</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        p {
+            font-size: 1.2em;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1>Welcome to the ToDo App</h1>
-    <p>Please <a href="/register">register</a> or <a href="/login">login</a> to manage your tasks.</p>
+    <h1>Dobrodošli u ToDo Aplikaciju</h1>
+    <p>Molimo vas da se <a href="/register">registrirate</a> ili <a href="/login">prijavite</a> kako biste upravljali svojim zadacima.</p>
 </div>
 </body>
 </html>

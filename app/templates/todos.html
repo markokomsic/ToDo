@@ -1,30 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ToDo App</title>
+    <title>ToDo Aplikacija</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eaeaea;
+            font-size: 1.2em;
+        }
+        .todo-title {
+            display: flex;
+            align-items: center;
+        }
+        .todo-title input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        .todo-title .title {
+            font-weight: bold;
+        }
+        .todo-title.completed {
+            text-decoration: line-through;
+            color: grey;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1>Your ToDo List</h1>
-    <form action="/todos" method="post">
+    <h1 class="my-4">Vaša ToDo Lista</h1>
+    <form id="todo-form" action="/todos" method="post" class="mb-4">
         <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" class="form-control">
+            <label for="title">Naslov:</label>
+            <input type="text" id="title" name="title" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="description">Description:</label>
-            <input type="text" id="description" name="description" class="form-control">
+            <label for="description">Opis:</label>
+            <input type="text" id="description" name="description" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-primary">Add ToDo</button>
+        <button type="submit" class="btn btn-primary">Dodaj Zadatak</button>
     </form>
-    <ul class="list-group mt-4">
+    <div class="list-group">
         {% for todo in todos %}
-        <li class="list-group-item">
-            <strong>{{ todo.title }}</strong> - {{ todo.description }}
-        </li>
+        <div class="list-group-item todo-item">
+            <div class="todo-title {% if todo.is_done %}completed{% endif %}">
+                <input type="checkbox" class="mark-complete" data-id="{{ todo.id }}" {% if todo.is_done %}checked{% endif %}>
+                <span class="title">{{ todo.title }}</span> - <span>{{ todo.description }}</span>
+            </div>
+            <form action="/todos/{{ todo.id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Jeste li sigurni da želite obrisati ovaj zadatak?');">
+                <button type="submit" class="btn btn-sm btn-danger">Obriši</button>
+            </form>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 </div>
+<script>
+    // Dodaj event listener za svaki checkbox
+    document.querySelectorAll('.mark-complete').forEach(item => {
+        item.addEventListener('change', event => {
+            const todoId = event.target.getAttribute('data-id');
+            const isDone = event.target.checked;
+            fetch(`/todos/${todoId}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'is_done': isDone })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Azuriraj klasu zadatka na osnovu statusa
+                    if (isDone) {
+                        event.target.parentElement.classList.add('completed');
+                    } else {
+                        event.target.parentElement.classList.remove('completed');
+                    }
+                } else {
+                    alert('Neuspješno ažuriranje statusa zadatka.');
+                }
+            });
+        });
+    });
+
+    // Validacija forme za prazna polja
+    document.getElementById('todo-form').addEventListener('submit', function(event) {
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        if (!title || !description) {
+            event.preventDefault();
+            alert('Molimo popunite oba polja: naslov i opis.');
+        }
+    });
+</script>
 </body>
 </html>
