@@ -33,14 +33,8 @@ Posjetite /login rutu kako biste se prijavili sa svojim korisničkim imenom i lo
 - **Upravljanje zadacima**
 Nakon prijave, bit ćete preusmjereni na /todos rutu gdje možete kreirati, ažurirati i brisati svoje zadatke.
 
-
-
-
-
-
-
-
-
+### Dokumentacija API-ja
+FastAPI automatski generira dokumentaciju za sve API rute. Dokumentaciju možete pregledati i testirati API putem Swagger UI na `/docs`.
 
 
 
